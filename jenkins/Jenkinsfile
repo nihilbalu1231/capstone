@@ -1,42 +1,62 @@
 pipeline {
     agent any
+
     environment {
         CI = 'true'
     }
+
     stages {
 
+        // ----------------------
+        // 1️⃣ Build Stage
+        // ----------------------
         stage('Build') {
             steps {
+                echo 'Installing npm dependencies...'
                 sh 'npm install'
             }
         }
 
+        // ----------------------
+        // 2️⃣ Test Stage
+        // ----------------------
         stage('Test') {
             steps {
+                echo 'Running unit tests...'
                 sh './jenkins/scripts/test.sh'
             }
         }
 
+        // ----------------------
+        // 3️⃣ SonarQube Analysis
+        // ----------------------
         stage('SonarQube Analysis') {
             steps {
-                // Use the SonarQube server configured in Jenkins
-                withSonarQubeEnv('SonarQube') {
-                    sh 'sonar-scanner -Dsonar.projectKey=week12-project -Dsonar.sources=./'
+                echo 'Running SonarQube analysis...'
+                withSonarQubeEnv('sonarqube') {   // must match Jenkins SonarQube server name
+                    sh 'sonar-scanner -Dsonar.projectKey=week12-project -Dsonar.sources=./src'
                 }
             }
         }
 
+        // ----------------------
+        // 4️⃣ Quality Gate
+        // ----------------------
         stage('Quality Gate') {
             steps {
+                echo 'Checking Quality Gate status...'
                 timeout(time: 5, unit: 'MINUTES') {
-                    // Fails pipeline if Quality Gate fails
                     waitForQualityGate abortPipeline: true
                 }
             }
         }
 
+        // ----------------------
+        // 5️⃣ Deliver Stage
+        // ----------------------
         stage('Deliver') {
             steps {
+                echo 'Deploying application...'
                 sh './jenkins/scripts/deliver.sh'
                 input message: 'Finished using the web site? (Click "Proceed" to continue)'
                 sh './jenkins/scripts/kill.sh'
@@ -44,6 +64,9 @@ pipeline {
         }
     }
 
+    // ----------------------
+    // Post actions
+    // ----------------------
     post {
         success {
             echo 'Pipeline completed successfully ✅'
