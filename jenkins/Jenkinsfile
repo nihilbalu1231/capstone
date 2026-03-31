@@ -2,13 +2,11 @@ pipeline {
     agent any
 
     environment {
-        CI = 'true'
-        DOCKER_IMAGE = 'nihilag/week12-project:latest'   // Fixed username
-        DOCKERHUB_USER = 'nihilag'                       // Your Docker Hub username
-        DOCKERHUB_TOKEN = credentials('dockerhub-token') // Token stored in Jenkins
+        DOCKER_IMAGE = 'nihilag/week12-project:latest'
     }
 
     stages {
+
         stage('Checkout') {
             steps {
                 checkout scm
@@ -33,32 +31,32 @@ pipeline {
             steps {
                 echo 'Running SonarQube analysis...'
                 withSonarQubeEnv('sonarqube') {
-                    sh """
+                    sh '''
                     /var/lib/jenkins/tools/hudson.plugins.sonar.SonarRunnerInstallation/sonarscanner/bin/sonar-scanner \
                     -Dsonar.projectKey=week12-project \
                     -Dsonar.sources=./src
-                    """
+                    '''
                 }
             }
         }
 
         stage('Docker Build & Push') {
             steps {
-                echo "Building Docker image..."
-                sh "docker build -t ${DOCKER_IMAGE} -f docker/Dockerfile ."
+                echo 'Building Docker image...'
 
-                echo "Logging into Docker Hub..."
-                sh "echo $DOCKERHUB_TOKEN | docker login -u $DOCKERHUB_USER --password-stdin"
+                sh 'docker build -t $DOCKER_IMAGE .'
 
-                echo "Pushing Docker image..."
-                sh "docker push ${DOCKER_IMAGE}"
-            }
-        }
+                echo 'Logging into Docker Hub...'
+                withCredentials([usernamePassword(
+                    credentialsId: 'docker-hub-id',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
+                }
 
-        stage('Deliver') {
-            steps {
-                echo 'Delivering application...'
-                sh './jenkins/scripts/deliver.sh'
+                echo 'Pushing Docker image...'
+                sh 'docker push $DOCKER_IMAGE'
             }
         }
     }
