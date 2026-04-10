@@ -1,76 +1,65 @@
 pipeline {
-    agent any
+agent any
 
-    environment {
-        DOCKER_IMAGE = 'nihilag/week12-project:latest'
-    }
+```
+environment {
+    DOCKER_IMAGE = 'nihilag/capstone-project:latest'
+}
 
-    stages {
+stages {
 
-        stage('Checkout') {
-            steps {
-                checkout scm
-            }
-        }
-
-        stage('Build') {
-            steps {
-                echo 'Installing npm dependencies...'
-                sh 'npm install'
-            }
-        }
-
-        stage('Test') {
-            steps {
-                echo 'Running unit tests...'
-                sh './jenkins/scripts/test.sh'
-            }
-        }
-
-        stage('SonarQube Analysis') {
-            steps {
-                echo 'Running SonarQube analysis...'
-                withSonarQubeEnv('sonarqube') {
-                    sh '''
-                    /var/lib/jenkins/tools/hudson.plugins.sonar.SonarRunnerInstallation/sonarscanner/bin/sonar-scanner \
-                    -Dsonar.projectKey=week12-project \
-                    -Dsonar.sources=./src
-                    '''
-                }
-            }
-        }
-
-        stage('Docker Build & Push') {
-            steps {
-                echo 'Building Docker image...'
-
-                sh 'docker build -t $DOCKER_IMAGE .'
-
-                echo 'Logging into Docker Hub...'
-                withCredentials([usernamePassword(
-                    credentialsId: 'dockerhub-token',
-                    usernameVariable: 'DOCKER_USER',
-                    passwordVariable: 'DOCKER_PASS'
-                )]) {
-                    sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
-                }
-
-                echo 'Pushing Docker image...'
-                sh 'docker push $DOCKER_IMAGE'
-            }
+    stage('Checkout') {
+        steps {
+            checkout scm
         }
     }
 
-    post {
-        always {
-            echo 'Pipeline finished.'
-            sh 'docker logout || true'
-        }
-        success {
-            echo 'Pipeline succeeded!'
-        }
-        failure {
-            echo 'Pipeline failed.'
+    stage('Build') {
+        steps {
+            echo 'Installing npm dependencies...'
+            sh 'npm install'
         }
     }
+
+    stage('Test') {
+        steps {
+            echo 'Running unit tests...'
+            sh './jenkins/scripts/test.sh'
+        }
+    }
+
+    stage('Docker Build & Push') {
+        steps {
+            echo 'Building Docker image...'
+            sh 'docker build -t $DOCKER_IMAGE .'
+
+            echo 'Logging into Docker Hub...'
+            withCredentials([usernamePassword(
+                credentialsId: 'dockerhub-token',
+                usernameVariable: 'DOCKER_USER',
+                passwordVariable: 'DOCKER_PASS'
+            )]) {
+                sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
+            }
+
+            echo 'Pushing Docker image...'
+            sh 'docker push $DOCKER_IMAGE'
+        }
+    }
+}
+
+post {
+    always {
+        echo 'Pipeline finished.'
+        sh 'docker logout || true'
+    }
+    success {
+        echo 'Pipeline succeeded!'
+    }
+    failure {
+        echo 'Pipeline failed.'
+    }
+}
+```
+
 }
