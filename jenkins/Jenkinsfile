@@ -16,24 +16,28 @@ stages {
 
     stage('Build') {
         steps {
-            echo 'Installing npm dependencies...'
+            echo 'Installing dependencies...'
             sh 'npm install'
         }
     }
 
     stage('Test') {
         steps {
-            echo 'Running unit tests...'
+            echo 'Running tests...'
             sh './jenkins/scripts/test.sh'
         }
     }
 
-    stage('Docker Build & Push') {
+    stage('Docker Build') {
         steps {
             echo 'Building Docker image...'
             sh 'docker build -t $DOCKER_IMAGE .'
+        }
+    }
 
-            echo 'Logging into Docker Hub...'
+    stage('Docker Push') {
+        steps {
+            echo 'Logging into DockerHub...'
             withCredentials([usernamePassword(
                 credentialsId: 'dockerhub-token',
                 usernameVariable: 'DOCKER_USER',
@@ -50,16 +54,19 @@ stages {
 
 post {
     always {
-        echo 'Pipeline finished.'
+        echo 'Pipeline Finished'
         sh 'docker logout || true'
     }
+
     success {
-        echo 'Pipeline succeeded!'
+        echo 'Build Success'
     }
+
     failure {
-        echo 'Pipeline failed.'
+        echo 'Build Failed'
     }
 }
 ```
 
 }
+
