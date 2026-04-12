@@ -1,15 +1,22 @@
-# simple-node-js-react-npm-app
+# DevOps CI/CD Project - Node.js & React App
 
-This repository is for the
-[Build a Node.js and React app with npm](https://jenkins.io/doc/tutorials/build-a-node-js-and-react-app-with-npm/)
-tutorial in the [Jenkins User Documentation](https://jenkins.io/doc/).
+Project Description
+This project demonstrates a complete DevOps workflow by building, testing, and deploying a Node.js and React application using Jenkins CI/CD pipeline.
 
-The repository contains a simple Node.js and React application which generates
-a web page with a "Learn React" link and is accompanied by a test to check that
-the application renders satisfactorily.
+The application is a simple web app that displays a page with a "Learn React" link. The main focus of this project is automation using Jenkins.
 
-The `jenkins` directory contains an example of the `Jenkinsfile` (i.e. Pipeline)
-you'll be creating yourself during the tutorial and the `scripts` subdirectory
-contains shell scripts with commands that are executed when Jenkins processes
-the "Test" and "Deliver" stages of your Pipeline.
-Testing Jenkins done
+---
+
+## 🛠 Tech Stack
+- Frontend: React.js
+- Backend: Node.js
+- CI/CD Tool: Jenkins
+- Version Control: Git & GitHub
+- Package Manager: npm
+- Server/Deployment: AWS EC2 (if used)
+
+
+### 1. Clone the repository
+```bash
+git clone https://github.com/your-username/your-repo-name.git
+cd your-repo-name
