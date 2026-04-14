@@ -42,4 +42,4 @@ Grafana displays monitoring dashboards
 
  Conclusion
  
-This project demonstrates how DevOps tools like Jenkins, Docker, AWS, Prometheus, and Grafana work together to automate the software delivery lifecycle and enable continuous integration and deployment.
+This project demonstrates how DevOps tools like Jenkins, Docker, AWS, Prometheus, and Grafana work together to automate the software delivery lifecycle and enable continuous integration and deployment
